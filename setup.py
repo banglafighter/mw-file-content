@@ -9,12 +9,12 @@ env = os.environ.get('source')
 
 
 def get_dependencies():
-    dependency = []
+    dependency = ["PyYAML==6.0.2"]
 
     if env and env == "code":
         return dependency
 
-    return dependency + []
+    return dependency + ["mw-common"]
 
 
 setup(
