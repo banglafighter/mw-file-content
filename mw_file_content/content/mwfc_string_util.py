@@ -46,3 +46,17 @@ class StringUtil:
         name = StringUtil.remove_special_character(name)
         name = StringUtil.remove_leading_number(name)
         return name
+
+    @staticmethod
+    def replace_space_with(text: str, to: str = "_"):
+        return re.sub(r'\s+', to, text)
+
+    @staticmethod
+    def human_readable(text: str, default=None):
+        if text is None:
+            return default
+        text = StringUtil.camelcase_to(copy(text), " ")
+        text = StringUtil.find_and_replace_with(text, "-", " ")
+        text = text.strip()
+        text = text.title()
+        return StringUtil.replace_space_with(text, " ")
