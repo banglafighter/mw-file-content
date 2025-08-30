@@ -74,3 +74,7 @@ class StringUtil:
         text = text.strip("-")
         text = text.lower()
         return text
+
+    @classmethod
+    def pad_zero(cls, number: int, width: int = 2) -> str:
+        return f"{number:0{width}d}"
