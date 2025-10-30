@@ -78,3 +78,9 @@ class StringUtil:
     @classmethod
     def pad_zero(cls, number: int, width: int = 2) -> str:
         return f"{number:0{width}d}"
+
+    @classmethod
+    def py_hyphen_name(cls, name: str):
+        name = cls.py_underscore_name(name=name)
+        name = cls.find_and_replace_with(text=name, find="_", replace="-")
+        return name
