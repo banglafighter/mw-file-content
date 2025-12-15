@@ -133,3 +133,34 @@ class FileUtil:
                     abs_file_path = os.path.abspath(os.path.join(dirpath, filename))
                     arcname = os.path.relpath(abs_file_path, source)
                     zip_file.write(abs_file_path, arcname)
+
+    @classmethod
+    def list_dir(cls, path: str, only_dir: bool = False, only_file: bool = False, is_recursive: bool = False, name_only: bool = False):
+        if only_dir and only_file:
+            raise MwException(f"dir and file cannot both be True")
+
+        base_path = Path(path)
+        if not base_path.exists() or not base_path.is_dir():
+            return []
+
+        if is_recursive:
+            iterator = base_path.rglob("*")
+        else:
+            iterator = base_path.iterdir()
+
+        result = []
+        for item in iterator:
+            try:
+                if only_dir and not item.is_dir():
+                    continue
+
+                if only_file and not item.is_file():
+                    continue
+
+                if name_only:
+                    result.append(item.name)
+                else:
+                    result.append(item)
+            except PermissionError:
+                continue
+        return result
