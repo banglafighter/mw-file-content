@@ -8,46 +8,55 @@ from pathlib import Path
 class Archive:
 
     @classmethod
-    def create_zip(cls, source: str | Path, zip_file_path: str | Path | None = None, *, overwrite: bool = False, return_bytes: bool = False, compression_level: int = 9 ) -> str | bytes:
+    def create_zip(cls, source: str | Path, zip_file_path: str | Path | None = None, *, overwrite: bool = False, return_bytes: bool = False, compression_level: int = 9) -> str | bytes:
         source = Path(source).resolve()
+
         if not source.exists():
             raise MwException(f"Source path does not exist: {source}")
+
+        if not 0 <= compression_level <= 9:
+            raise MwException("compression_level must be between 0 and 9")
 
         if return_bytes:
             buffer = io.BytesIO()
 
             with zipfile.ZipFile(
-                    buffer,
-                    mode="w",
-                    compression=zipfile.ZIP_DEFLATED,
-                    compresslevel=compression_level
+                buffer,
+                mode="w",
+                compression=zipfile.ZIP_DEFLATED,
+                compresslevel=compression_level
             ) as zip_file:
                 cls._add_source_to_zip(zip_file, source)
+
             return buffer.getvalue()
 
         if zip_file_path is None:
             raise MwException("zip_file_path is required when return_bytes=False")
 
         zip_file_path = cls._normalize_zip_path(zip_file_path)
+
         if zip_file_path.exists() and not overwrite:
             raise MwException(f"Zip file already exists: {zip_file_path}")
 
-        zip_file_path.parent.mkdir(parents=True,exist_ok=True)
+        zip_file_path.parent.mkdir(parents=True, exist_ok=True)
 
         with zipfile.ZipFile(
-                zip_file_path,
-                mode="w",
-                compression=zipfile.ZIP_DEFLATED,
-                compresslevel=compression_level
+            zip_file_path,
+            mode="w",
+            compression=zipfile.ZIP_DEFLATED,
+            compresslevel=compression_level
         ) as zip_file:
             cls._add_source_to_zip(zip_file, source)
+
         return str(zip_file_path)
 
     @classmethod
     def _normalize_zip_path(cls, zip_file_path: str | Path) -> Path:
         zip_file_path = Path(zip_file_path)
+
         if zip_file_path.suffix.lower() != ".zip":
             zip_file_path = zip_file_path.with_suffix(".zip")
+
         return zip_file_path.resolve()
 
     @classmethod
@@ -60,17 +69,21 @@ class Archive:
         else:
             destination.mkdir(parents=True, exist_ok=True)
 
-        if isinstance(zip_source, bytes):
-            zip_stream = io.BytesIO(zip_source)
-            with zipfile.ZipFile(zip_stream, "r") as zip_file:
-                cls._safe_extract(zip_file, destination)
-        else:
-            zip_source = Path(zip_source).resolve()
-            if not zip_source.exists():
-                raise MwException(f"Zip file does not exist: {zip_source}")
+        try:
+            if isinstance(zip_source, bytes):
+                zip_stream = io.BytesIO(zip_source)
+                with zipfile.ZipFile(zip_stream, "r") as zip_file:
+                    cls._safe_extract(zip_file, destination)
+            else:
+                zip_source = Path(zip_source).resolve()
+                if not zip_source.exists():
+                    raise MwException(f"Zip file does not exist: {zip_source}")
 
-            with zipfile.ZipFile(zip_source, "r") as zip_file:
-                cls._safe_extract(zip_file, destination)
+                with zipfile.ZipFile(zip_source, "r") as zip_file:
+                    cls._safe_extract(zip_file, destination)
+
+        except zipfile.BadZipFile as e:
+            raise MwException("Invalid zip archive") from e
 
         return str(destination)
 
@@ -96,9 +109,12 @@ class Archive:
     @classmethod
     def _safe_extract(cls, zip_file: zipfile.ZipFile, destination: Path) -> None:
         destination = destination.resolve()
+
         for member in zip_file.namelist():
             target = (destination / member).resolve()
-
-            if not str(target).startswith(str(destination)):
+            try:
+                target.relative_to(destination)
+            except ValueError:
                 raise MwException(f"Unsafe zip entry detected: {member}")
+
         zip_file.extractall(destination)

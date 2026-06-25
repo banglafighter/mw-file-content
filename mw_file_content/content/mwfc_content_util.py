@@ -1,6 +1,6 @@
 from pathlib import Path
-from mw_common.mw_exception import MwException
-from mw_file_content.common.mw_file_content_data import FindReplaceData
+from mw_common import MwException
+from ..common.mw_file_content_data import FindReplaceData
 
 
 class ContentUtil:
