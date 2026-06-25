@@ -84,3 +84,66 @@ class StringUtil:
         name = cls.py_underscore_name(name=name)
         name = cls.find_and_replace_with(text=name, find="_", replace="-")
         return name
+
+    @classmethod
+    def _to_words(cls, text: str) -> list[str]:
+        if not text:
+            return []
+        processed = text.replace('&', ' and ')
+        processed = re.sub(r'([a-z])([A-Z])', r'\1 \2', processed)
+        processed = re.sub(r'[^a-zA-Z0-9]', ' ', processed)
+        return [word for word in processed.lower().split() if word]
+
+    @classmethod
+    def to_hyphen_case(cls, text: str) -> str:
+        return '-'.join(cls._to_words(text))
+
+    @classmethod
+    def to_kabab_case(cls, text: str) -> str:
+        return cls.to_hyphen_case(text)
+
+    @classmethod
+    def to_underscore_case(cls, text: str) -> str:
+        return '_'.join(cls._to_words(text))
+
+    @classmethod
+    def to_snake_case(cls, text: str) -> str:
+        return cls.to_underscore_case(text)
+
+    @classmethod
+    def to_camel_case(cls, text: str) -> str:
+        words = cls._to_words(text)
+        if not words:
+            return ''
+        return words[0] + ''.join(word.capitalize() for word in words[1:])
+
+    @classmethod
+    def to_pascal_case(cls, text: str) -> str:
+        return ''.join(word.capitalize() for word in cls._to_words(text))
+
+    @classmethod
+    def to_title_case(cls, text: str) -> str:
+        return ' '.join(word.capitalize() for word in cls._to_words(text))
+
+    @classmethod
+    def to_sentence_case(cls, text: str) -> str:
+        words = cls._to_words(text)
+        if not words:
+            return ''
+        sentence = ' '.join(words)
+        return sentence.capitalize()
+
+    @classmethod
+    def to_schema_column_name_snake_case(cls, text: str, default_value: str = "") -> str:
+        if not text:
+            return default_value
+
+        parts = text.split('.')
+        transformed_parts = []
+
+        for part in parts:
+            processed = re.sub(r'([a-z])([A-Z])', r'\1 \2', part)
+            processed = re.sub(r'[^a-zA-Z0-9]', ' ', processed)
+            words = [word for word in processed.lower().split() if word]
+            transformed_parts.append('_'.join(words))
+        return '.'.join(transformed_parts)
