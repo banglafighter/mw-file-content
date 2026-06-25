@@ -1,4 +1,3 @@
-import zipfile
 from datetime import datetime
 import os
 import shutil
@@ -114,25 +113,6 @@ class FileUtil:
         elif TB <= B:
             return '{0:.2f} TB'.format(B / TB)
         return None
-
-    @staticmethod
-    def create_zip(source: str, zip_file_path: str):
-        source = os.path.abspath(source)
-        zip_file_path = os.path.abspath(zip_file_path)
-
-        if not os.path.exists(source):
-            raise MwException(f"Source path does not exist: {source}")
-
-        if os.path.exists(zip_file_path):
-            raise MwException(f"Zip file already exists: {zip_file_path}")
-
-        # Create zip safely using context manager
-        with zipfile.ZipFile(zip_file_path, "w", zipfile.ZIP_DEFLATED) as zip_file:
-            for dirpath, _, filenames in os.walk(source):
-                for filename in filenames:
-                    abs_file_path = os.path.abspath(os.path.join(dirpath, filename))
-                    arcname = os.path.relpath(abs_file_path, source)
-                    zip_file.write(abs_file_path, arcname)
 
     @classmethod
     def list_dir(cls, path: str, only_dir: bool = False, only_file: bool = False, is_recursive: bool = False, name_only: bool = False):
