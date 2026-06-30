@@ -147,3 +147,17 @@ class StringUtil:
             words = [word for word in processed.lower().split() if word]
             transformed_parts.append('_'.join(words))
         return '.'.join(transformed_parts)
+
+    @classmethod
+    def trim(cls, text: str) -> str:
+        return text.strip() if text else ""
+
+    @classmethod
+    def lowercase(cls, text: str) -> str:
+        return text.lower() if text else ""
+
+    @classmethod
+    def trim_lowercase(cls, text: str) -> str:
+        if not text:
+            return ""
+        return text.strip().lower()
