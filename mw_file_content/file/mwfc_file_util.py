@@ -144,3 +144,7 @@ class FileUtil:
             except PermissionError:
                 continue
         return result
+
+    @staticmethod
+    def to_file_url(path: str | Path) -> str:
+        return Path(path).resolve().as_uri()
